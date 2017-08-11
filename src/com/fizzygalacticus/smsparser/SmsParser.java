@@ -70,14 +70,14 @@ public class SmsParser extends JFrame {
 	 * @throws HeadlessException
 	 */
 	public SmsParser() throws HeadlessException {
-		this("Ike's SMS Parser");	
+		this("SMS Parser");
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(infoLabel, GroupLayout.DEFAULT_SIZE, 608, Short.MAX_VALUE)
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+						.addComponent(infoLabel)
+						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(messageScrollArea, GroupLayout.PREFERRED_SIZE, 457, GroupLayout.PREFERRED_SIZE)))
@@ -89,7 +89,7 @@ public class SmsParser extends JFrame {
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addComponent(messageScrollArea, GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
-						.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE))
+						.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(infoLabel)
 					.addContainerGap())
@@ -100,7 +100,7 @@ public class SmsParser extends JFrame {
 	 * @param gc
 	 */
 	public SmsParser(GraphicsConfiguration gc) {
-		this("Ike's SMS Parser", gc);
+		this("SMS Parser", gc);
 	}
 
 	/**
