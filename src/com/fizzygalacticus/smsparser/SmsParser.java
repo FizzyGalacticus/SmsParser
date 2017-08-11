@@ -27,6 +27,8 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 
 import java.awt.Font;
+
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -39,8 +41,10 @@ import org.json.JSONObject;
 import org.json.XML;
 
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -69,6 +73,7 @@ import java.awt.Toolkit;
  */
 public class SmsParser extends JFrame {
 	private static final long serialVersionUID = 7280291368835838916L;
+	
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu fileMenu = new JMenu("File");
 	private JMenuItem openMenuItem = new JMenuItem("Open...");
@@ -84,8 +89,9 @@ public class SmsParser extends JFrame {
 	private HashMap<String, ArrayList<Message>> messageMap = new HashMap<String, ArrayList<Message>>();
 	private JTextField searchInput = new JTextField();
 	private final Component horizontalStrut = Box.createHorizontalStrut(403);
-	private final JMenu editMenu = new JMenu("Edit");
-	private final JMenuItem exportMenuItem = new JMenuItem("Export");
+	private final JMenu exportMenu = new JMenu("Export...");
+	private final JMenuItem toPdfMenuItem = new JMenuItem("To PDF");
+	private final JMenuItem toJsonMenuItem = new JMenuItem("To JSON");
 
 	/**
 	 * @throws HeadlessException
@@ -155,12 +161,16 @@ public class SmsParser extends JFrame {
 		
 		this.exitMenuItem.addActionListener(new SmsParserActionListener());
 		this.fileMenu.add(this.exitMenuItem);
-		exportMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		toPdfMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
 		
-		this.exportMenuItem.addActionListener(new SmsParserActionListener());
-		this.editMenu.add(this.exportMenuItem);
+		this.toPdfMenuItem.addActionListener(new SmsParserActionListener());
+		this.exportMenu.add(this.toPdfMenuItem);
 		
-		menuBar.add(editMenu);
+		menuBar.add(exportMenu);
+		toJsonMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		this.toJsonMenuItem.addActionListener(new SmsParserActionListener());
+		
+		exportMenu.add(toJsonMenuItem);
 		
 		menuBar.add(horizontalStrut);
 		searchInput.addKeyListener(new SmsParserActionListener());
@@ -310,7 +320,7 @@ public class SmsParser extends JFrame {
 			//Actions on open menu item
 			else if(source == openMenuItem) {
 				if(modifier == SmsParserActionListener.LEFT_MOUSE_BUTTON) {
-					String file = this.openFileChooser();
+					String file = this.openFileChooser(new FileNameExtensionFilter("XML File", "xml", "XML"));
 					if(file != null && file.length() > 0) {
 						infoText.setText("Loading...");
 						((DefaultListModel<String>) contactList.getModel()).removeAllElements();
@@ -323,9 +333,9 @@ public class SmsParser extends JFrame {
 				}
 			}
 			//Actions on export menu item
-			else if(source == exportMenuItem) {
+			else if(source == toPdfMenuItem) {
 				if(modifier == SmsParserActionListener.LEFT_MOUSE_BUTTON) {
-					String filename = this.openFileChooser();
+					String filename = this.openFileChooser(new FileNameExtensionFilter("PDF File", "pdf", "PDF"));
 					Document document = new Document();
 					try {
 						PdfWriter.getInstance(document, new FileOutputStream(new File(filename)));
@@ -343,6 +353,27 @@ public class SmsParser extends JFrame {
 					} catch (Exception e) {
 						infoText.setText("Failed to export: Could not write to file.");
 					}
+				}
+			}
+			else if(source == toJsonMenuItem) {
+				String filename = this.openFileChooser(new FileNameExtensionFilter("JSON File", "json", "JSON"));
+				JSONObject json = new JSONObject();
+				ArrayList<Message> selectedMessages = messageMap.get(contactList.getSelectedValue());
+				json.put("contact_name", selectedMessages.get(0).getContactName());
+				JSONArray arr = new JSONArray();
+				for(Message message : selectedMessages) {
+					JSONObject msg = new JSONObject();
+					msg.put("message", message.getBody());
+					msg.put("date", message.getReadableDateReceived());
+					arr.put(msg);
+				}
+				json.put("messages", arr);
+				
+				try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename))) {
+		            writer.write(json.toString());
+		            infoText.setText("Successfully exported messages to: " + filename);
+		        } catch (IOException e) {
+					infoText.setText("Failed to export: Could not write to file.");
 				}
 			}
 		}
@@ -405,8 +436,16 @@ public class SmsParser extends JFrame {
 		}
 		
 		private String openFileChooser() {
+			return this.openFileChooser(null);
+		}
+		
+		private String openFileChooser(FileNameExtensionFilter filter) {
 			JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 			String file = "";
+			
+			if(filter != null) {
+				jfc.setFileFilter(filter);
+			}
 
 			int returnValue = jfc.showOpenDialog(null);
 
