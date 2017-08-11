@@ -6,7 +6,7 @@ This project was created in order to help a friend of mine format his backed up 
 Because I needed to get something going quickly, and it needed to be  platform independant, I decided to write this in Java using the Swing framework. This makes it possible for me to just drag and drop the visual components in an IDE and just leaves the logic of each function for me to write.
 
 ### Download
-You can find the latest JAR [here](https://drive.google.com/file/d/0BzXFMNj3OfYMTEV1NFdlUlpMdjg/view?usp=sharing).
+You can find the latest JAR [here](https://drive.google.com/uc?export=download&id=0BzXFMNj3OfYMTEV1NFdlUlpMdjg).
 
 ### License
 I am currently looking into my options as far as licensing goes, as the libraries that I'm using all use different open source licenses. So far we have:
