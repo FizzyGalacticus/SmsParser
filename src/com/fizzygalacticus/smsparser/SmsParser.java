@@ -9,7 +9,6 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 
@@ -36,7 +35,6 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.Highlighter.HighlightPainter;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
@@ -337,12 +335,13 @@ public class SmsParser extends JFrame {
 				if(modifier == SmsParserActionListener.LEFT_MOUSE_BUTTON) {
 					String filename = this.openFileChooser(new FileNameExtensionFilter("PDF File", "pdf", "PDF"));
 					Document document = new Document();
+					infoText.setText("Exporting to PDF...");
 					try {
 						PdfWriter.getInstance(document, new FileOutputStream(new File(filename)));
 						document.open();
-						ArrayList<Message> messages = messageMap.get(contactList.getSelectedValue());
+						ArrayList<Message> selectedMessages = messageMap.get(contactList.getSelectedValue());
 						
-						for(Message message : messages) {
+						for(Message message : selectedMessages) {
 							document.add(new Paragraph(message.toString()));
 							document.add(Chunk.NEWLINE);
 						}
@@ -356,24 +355,27 @@ public class SmsParser extends JFrame {
 				}
 			}
 			else if(source == toJsonMenuItem) {
-				String filename = this.openFileChooser(new FileNameExtensionFilter("JSON File", "json", "JSON"));
-				JSONObject json = new JSONObject();
-				ArrayList<Message> selectedMessages = messageMap.get(contactList.getSelectedValue());
-				json.put("contact_name", selectedMessages.get(0).getContactName());
-				JSONArray arr = new JSONArray();
-				for(Message message : selectedMessages) {
-					JSONObject msg = new JSONObject();
-					msg.put("message", message.getBody());
-					msg.put("date", message.getReadableDateReceived());
-					arr.put(msg);
-				}
-				json.put("messages", arr);
-				
-				try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename))) {
-		            writer.write(json.toString());
-		            infoText.setText("Successfully exported messages to: " + filename);
-		        } catch (IOException e) {
-					infoText.setText("Failed to export: Could not write to file.");
+				if(modifier == SmsParserActionListener.LEFT_MOUSE_BUTTON) {
+					String filename = this.openFileChooser(new FileNameExtensionFilter("JSON File", "json", "JSON"));
+					JSONObject json = new JSONObject();
+					ArrayList<Message> selectedMessages = messageMap.get(contactList.getSelectedValue());
+					json.put("contact_name", selectedMessages.get(0).getContactName());
+					JSONArray arr = new JSONArray();
+					infoText.setText("Exporting to JSON...");
+					for(Message message : selectedMessages) {
+						JSONObject msg = new JSONObject();
+						msg.put("message", message.getBody());
+						msg.put("date", message.getReadableDateReceived());
+						arr.put(msg);
+					}
+					json.put("messages", arr);
+					
+					try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename))) {
+			            writer.write(json.toString());
+			            infoText.setText("Successfully exported messages to: " + filename);
+			        } catch (IOException e) {
+						infoText.setText("Failed to export: Could not write to file.");
+					}
 				}
 			}
 		}
