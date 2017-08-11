@@ -62,6 +62,7 @@ public class SmsParser extends JFrame {
 	private JScrollPane contactScrollArea = new JScrollPane();	
 	private JList<String> contactList = new JList<>(new DefaultListModel<String>());
 	private JLabel infoLabel = new JLabel("Info: ");
+	private JLabel infoText = new JLabel("Please open a valid *.xml file.");
 	private GroupLayout groupLayout = new GroupLayout(getContentPane());
 	
 	private HashMap<String, ArrayList<Message>> messageMap = new HashMap<String, ArrayList<Message>>();
@@ -76,11 +77,14 @@ public class SmsParser extends JFrame {
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(infoLabel)
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
 							.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(messageScrollArea, GroupLayout.PREFERRED_SIZE, 457, GroupLayout.PREFERRED_SIZE)))
+							.addComponent(messageScrollArea, GroupLayout.PREFERRED_SIZE, 457, GroupLayout.PREFERRED_SIZE))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(infoLabel)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(infoText, GroupLayout.DEFAULT_SIZE, 566, Short.MAX_VALUE)))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -89,10 +93,12 @@ public class SmsParser extends JFrame {
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addComponent(messageScrollArea, GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
-						.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE))
+						.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 387, Short.MAX_VALUE))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(infoLabel)
-					.addContainerGap())
+					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+						.addComponent(infoLabel)
+						.addComponent(infoText))
+					.addGap(6))
 		);
 	}
 
@@ -148,12 +154,14 @@ public class SmsParser extends JFrame {
 	}
 	
 	public void populateMessageFields() {
+		this.infoText.setText("Displaying messages...");
 		for(String contact : this.messageMap.keySet()) {
 			DefaultListModel<String> model = (DefaultListModel<String>) this.contactList.getModel();
 			model.addElement(contact);
 		}
 		
 		this.contactList.setSelectedIndex(0);
+		this.infoText.setText("Done.");
 	}
 	
 	private class Message {
@@ -260,6 +268,7 @@ public class SmsParser extends JFrame {
 				if(modifier == SmsParserActionListener.LEFT_MOUSE_BUTTON) {
 					String file = this.openFileChooser();
 					if(file != null && file.length() > 0) {
+						infoText.setText("Loading...");
 						((DefaultListModel) contactList.getModel()).removeAllElements();
 						messageArea.setText("");
 						messageMap.clear();
@@ -297,6 +306,7 @@ public class SmsParser extends JFrame {
 				message.setContactName(jsonMessage.getString("contact_name"));
 				message.setDateSent(jsonMessage.getLong("date_sent"));
 				message.setType(jsonMessage.getInt("type"));
+				infoText.setText("Reading message from: " + message.getContactName());
 				
 				try {
 					message.setBody(jsonMessage.getString("body"));
