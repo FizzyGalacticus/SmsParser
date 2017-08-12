@@ -248,16 +248,18 @@ public class SmsParser extends JFrame {
 		}
 		
 		public String getMapKey() {
-			return this.getContactName() + " (" + this.getAddress() + ")";
+			if(this.getContactName().equalsIgnoreCase("(Unknown)"))
+				return this.getContactName() + " (" + this.getAddress() + ")";
+			return this.getContactName();
 		}
 		
 		public String toString() {
 			String ret = "";
 			
 			if(this.getType() == Message.TYPE_FROM)
-				ret += "FROM ";
+				ret += this.getContactName() + " ";
 			else if(this.getType() == Message.TYPE_TO)
-				ret += "TO ";
+				ret += "You ";
 			
 			ret += "(" + this.readableDateReceived + "): ";
 			ret += this.getBody();
