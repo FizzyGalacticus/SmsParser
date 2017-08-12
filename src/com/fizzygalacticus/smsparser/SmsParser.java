@@ -89,7 +89,7 @@ public class SmsParser extends JFrame {
 	 * @throws HeadlessException
 	 */
 	public SmsParser() throws HeadlessException {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(SmsParser.class.getResource("/icons/messageIcon.ico")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(SmsParser.class.getResource("/icons/messageIcon.png")));
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
