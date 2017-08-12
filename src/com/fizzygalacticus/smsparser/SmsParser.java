@@ -3,6 +3,7 @@
  */
 package com.fizzygalacticus.smsparser;
 
+import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -226,17 +227,7 @@ public class SmsParser extends JFrame {
 			return address;
 		}
 		public void setAddress(String address) {
-			PhoneNumber addr = new PhoneNumber();
-			if(address.length() > 0 & address.charAt(0) == '+')
-				addr.setRawInput(address.substring(1, address.length()));
-			else
-				addr.setRawInput(address);
-			
-			PhoneNumberUtil util = PhoneNumberUtil.getInstance();
-			this.address = util.format(addr, PhoneNumberFormat.RFC3966);
-		}
-		public void setAddress(Long address) {
-			this.setAddress(address.toString());
+			this.address = this.formatPhoneNumber(address);
 		}
 		public String getBody() {
 			return body;
@@ -244,14 +235,30 @@ public class SmsParser extends JFrame {
 		public void setBody(String body) {
 			this.body = body;
 		}
-		public void setBody(Long body) {
-			this.body = body.toString();
+		
+		private String formatPhoneNumber(String num) {
+			String ret = "";
+			
+			if(num != null) {
+				if(num.length() < 7)
+					ret = num;
+				else {
+					PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+					PhoneNumber number;
+					try {
+						number = util.parseAndKeepRawInput(num, "US");
+						ret  = util.format(number, PhoneNumberFormat.INTERNATIONAL);
+					} catch (NumberParseException e) {
+						ret = num;
+					}
+				}
+			}
+			
+			return ret;
 		}
 		
 		public String getMapKey() {
-			if(this.getContactName().equalsIgnoreCase("(Unknown)"))
-				return this.getContactName() + " (" + this.getAddress() + ")";
-			return this.getContactName();
+			return this.getContactName() + " (" + this.getAddress() + ")";
 		}
 		
 		public String toString() {
