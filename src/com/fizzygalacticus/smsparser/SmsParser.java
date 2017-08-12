@@ -6,6 +6,7 @@ package com.fizzygalacticus.smsparser;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
@@ -325,11 +326,8 @@ public class SmsParser extends JFrame {
 						ArrayList<Message> messages = messageMap.get(contactList.getSelectedValue());
 						
 						for(Message message : messages) {
-							Paragraph p = new Paragraph();
-							p.add(message.toString());
-							p.setAlignment(Element.ALIGN_LEFT);
-							
-							document.add(p);
+							document.add(new Paragraph(message.toString()));
+							document.add(Chunk.NEWLINE);
 						}
 						
 						document.close();
@@ -351,7 +349,7 @@ public class SmsParser extends JFrame {
 				ArrayList<Message> contactMessages = messageMap.get(selectedKey);
 				messageArea.setText("");
 				for(Message message : contactMessages) {
-					messageArea.append(message.toString() + "\n");
+					messageArea.append(message.toString() + "\n\n");
 				}
 			}
 		}
