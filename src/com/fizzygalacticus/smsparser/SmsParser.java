@@ -23,6 +23,10 @@ import javax.swing.JLabel;
 
 import java.awt.Font;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
+import javax.swing.text.Highlighter.HighlightPainter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +50,15 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.JTextField;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+
+import javax.swing.Box;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 /**
  * @author FizzyGalacticus
@@ -66,6 +79,8 @@ public class SmsParser extends JFrame {
 	private GroupLayout groupLayout = new GroupLayout(getContentPane());
 	
 	private HashMap<String, ArrayList<Message>> messageMap = new HashMap<String, ArrayList<Message>>();
+	private JTextField searchInput = new JTextField();
+	private final Component horizontalStrut = Box.createHorizontalStrut(423);
 
 	/**
 	 * @throws HeadlessException
@@ -151,6 +166,14 @@ public class SmsParser extends JFrame {
 		
 		this.exitMenuItem.addActionListener(new SmsParserActionListener());
 		this.fileMenu.add(this.exitMenuItem);
+		
+		menuBar.add(horizontalStrut);
+		searchInput.addKeyListener(new SmsParserActionListener());
+		
+		searchInput.setFont(new Font("DejaVu Sans", Font.PLAIN, 12));
+		searchInput.setText("Search...");
+		menuBar.add(searchInput);
+		searchInput.setColumns(3);
 	}
 	
 	public void populateMessageFields() {
@@ -250,9 +273,27 @@ public class SmsParser extends JFrame {
 		}
 	}
 	
-	private class SmsParserActionListener implements ActionListener, ListSelectionListener {
+	private class SmsParserActionListener extends KeyAdapter implements ActionListener, ListSelectionListener {
 		private static final int LEFT_MOUSE_BUTTON = 16;
 		private static final int RIGHT_MOUSE_BUTTON = 4;
+		
+		public void keyReleased(KeyEvent e) {
+			String searchText = searchInput.getText();
+			String messageAreaText = messageArea.getText();
+			Highlighter highlighter = messageArea.getHighlighter();
+			HighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.decode("#85a7fc"));
+			highlighter.removeAllHighlights();
+			
+			if(searchText.length() > 0 && messageAreaText.length() > 0) {
+				ArrayList<Integer> indices = this.getAllIndicesOfMatchingWords(searchText, messageAreaText);
+				
+				for(Integer index : indices) {
+					try {
+						highlighter.addHighlight(index, index + searchText.length(), painter);
+					} catch (BadLocationException except) {}
+				}
+			}
+		}
 		
 		public void actionPerformed(ActionEvent arg0) {
 			int modifier = arg0.getModifiers();
@@ -292,6 +333,19 @@ public class SmsParser extends JFrame {
 					messageArea.append(message.toString() + "\n");
 				}
 			}
+		}
+		
+		private ArrayList<Integer> getAllIndicesOfMatchingWords(String searchStr, String fullStr) {
+			ArrayList<Integer> ret = new ArrayList<Integer>();
+			
+			int index = 0;
+			while(index > -1) {
+				index = fullStr.toLowerCase().indexOf(searchStr.toLowerCase(), index+1);
+				if(index > -1)
+					ret.add(new Integer(index));
+			}
+			
+			return ret;
 		}
 		
 		private void handleMessages(JSONObject messages) {
