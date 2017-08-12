@@ -6,8 +6,11 @@ package com.fizzygalacticus.smsparser;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
-import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 
 import javax.swing.JFileChooser;
@@ -35,6 +38,7 @@ import org.json.XML;
 
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -47,6 +51,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
@@ -54,11 +59,11 @@ import javax.swing.JTextField;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 
 import javax.swing.Box;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.Toolkit;
 
 /**
  * @author FizzyGalacticus
@@ -80,26 +85,28 @@ public class SmsParser extends JFrame {
 	
 	private HashMap<String, ArrayList<Message>> messageMap = new HashMap<String, ArrayList<Message>>();
 	private JTextField searchInput = new JTextField();
-	private final Component horizontalStrut = Box.createHorizontalStrut(423);
+	private final Component horizontalStrut = Box.createHorizontalStrut(403);
+	private final JMenu editMenu = new JMenu("Edit");
+	private final JMenuItem exportMenuItem = new JMenuItem("Export");
 
 	/**
 	 * @throws HeadlessException
 	 */
 	public SmsParser() throws HeadlessException {
-		this("SMS Parser");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(SmsParser.class.getResource("/icons/messageIcon.ico")));
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(messageScrollArea, GroupLayout.PREFERRED_SIZE, 457, GroupLayout.PREFERRED_SIZE))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(infoLabel)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(infoText, GroupLayout.DEFAULT_SIZE, 566, Short.MAX_VALUE)))
+							.addComponent(infoText, GroupLayout.PREFERRED_SIZE, 470, GroupLayout.PREFERRED_SIZE)))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -107,37 +114,15 @@ public class SmsParser extends JFrame {
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(messageScrollArea, GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
-						.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 387, Short.MAX_VALUE))
+						.addComponent(contactScrollArea, GroupLayout.DEFAULT_SIZE, 387, Short.MAX_VALUE)
+						.addComponent(messageScrollArea, GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(infoLabel)
 						.addComponent(infoText))
-					.addGap(6))
+					.addContainerGap())
 		);
-	}
-
-	/**
-	 * @param gc
-	 */
-	public SmsParser(GraphicsConfiguration gc) {
-		this("SMS Parser", gc);
-	}
-
-	/**
-	 * @param title
-	 * @throws HeadlessException
-	 */
-	public SmsParser(String title) throws HeadlessException {
-		this(title, null);
-	}
-
-	/**
-	 * @param title
-	 * @param gc
-	 */
-	public SmsParser(String title, GraphicsConfiguration gc) {
-		super(title, gc);
+		setTitle("SMS Parser");
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
 		this.setSize(640, 480);
@@ -154,23 +139,35 @@ public class SmsParser extends JFrame {
 		getContentPane().setLayout(groupLayout);
 		
 		this.setVisible(true);
+			infoLabel.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+			infoText.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
 	}
 	
 	public void createMenus() {
+		menuBar.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
 		setJMenuBar(this.menuBar);
+		fileMenu.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
 		
 		this.menuBar.add(this.fileMenu);
+		openMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
 		
 		this.openMenuItem.addActionListener(new SmsParserActionListener());
 		this.fileMenu.add(this.openMenuItem);
+		exitMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
 		
 		this.exitMenuItem.addActionListener(new SmsParserActionListener());
 		this.fileMenu.add(this.exitMenuItem);
+		exportMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		
+		this.exportMenuItem.addActionListener(new SmsParserActionListener());
+		this.editMenu.add(this.exportMenuItem);
+		
+		menuBar.add(editMenu);
 		
 		menuBar.add(horizontalStrut);
 		searchInput.addKeyListener(new SmsParserActionListener());
 		
-		searchInput.setFont(new Font("DejaVu Sans", Font.PLAIN, 12));
+		searchInput.setFont(new Font("DejaVu Serif", Font.PLAIN, 12));
 		searchInput.setText("Search...");
 		menuBar.add(searchInput);
 		searchInput.setColumns(3);
@@ -316,6 +313,32 @@ public class SmsParser extends JFrame {
 						String xml = this.getXmlFromFile(file);
 						JSONObject json = this.convertXmlToJson(xml);
 						this.handleMessages(json);
+					}
+				}
+			}
+			//Actions on export menu item
+			else if(source == exportMenuItem) {
+				if(modifier == SmsParserActionListener.LEFT_MOUSE_BUTTON) {
+					String filename = this.openFileChooser();
+					Document document = new Document();
+					try {
+						PdfWriter.getInstance(document, new FileOutputStream(new File(filename)));
+						document.open();
+						ArrayList<Message> messages = messageMap.get(contactList.getSelectedValue());
+						
+						for(Message message : messages) {
+							Paragraph p = new Paragraph();
+							p.add(message.toString());
+							p.setAlignment(Element.ALIGN_LEFT);
+							
+							document.add(p);
+						}
+						
+						document.close();
+						infoText.setText("Successfully exported messages to: " + filename);
+						
+					} catch (Exception e) {
+						infoText.setText("Failed to export: Could not write to file.");
 					}
 				}
 			}
