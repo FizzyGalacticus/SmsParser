@@ -381,19 +381,8 @@ public class SmsParser extends JFrame {
 				message.setType(jsonMessage.getInt("type"));
 				infoText.setText("Reading message from: " + message.getContactName());
 				
-				try {
-					message.setBody(jsonMessage.getString("body"));
-				}
-				catch(JSONException e) {
-					message.setBody(jsonMessage.getLong("body"));
-				}
-				
-				try {
-					message.setAddress(jsonMessage.getString("address"));
-				}
-				catch(JSONException e) {
-					message.setAddress(jsonMessage.getLong("address"));
-				}
+				message.setBody(jsonMessage.get("body").toString());
+				message.setAddress(jsonMessage.get("address").toString());
 				
 				if(!messageMap.containsKey(message.getMapKey()))
 					messageMap.put(message.getMapKey(), new ArrayList<Message>());
