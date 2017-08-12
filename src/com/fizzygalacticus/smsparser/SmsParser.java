@@ -43,9 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.awt.event.ActionEvent;
 
 import javax.swing.DefaultListModel;
@@ -306,7 +303,7 @@ public class SmsParser extends JFrame {
 					String file = this.openFileChooser();
 					if(file != null && file.length() > 0) {
 						infoText.setText("Loading...");
-						((DefaultListModel) contactList.getModel()).removeAllElements();
+						((DefaultListModel<String>) contactList.getModel()).removeAllElements();
 						messageArea.setText("");
 						messageMap.clear();
 						String xml = this.getXmlFromFile(file);
@@ -438,62 +435,6 @@ public class SmsParser extends JFrame {
 		
 		private JSONObject convertXmlToJson(String xml) {
 			return XML.toJSONObject(xml);
-		}
-		
-		private Map<String, Object> jsonToMap(JSONObject json) {
-			Map<String, Object> retMap = new HashMap<String, Object>();
-
-			if(json != JSONObject.NULL) {
-				retMap = this.toMap(json);
-			}
-
-			return retMap;
-		}
-
-		private Map<String, Object> toMap(JSONObject object) throws JSONException {
-			Map<String, Object> map = new HashMap<String, Object>();
-
-			Iterator<String> keysItr = object.keys();
-			while(keysItr.hasNext()) {
-				String key = keysItr.next();
-				Object value = object.get(key);
-
-				if(value instanceof JSONArray) {
-					value = this.toList((JSONArray) value);
-				}
-
-				else if(value instanceof JSONObject) {
-					value = toMap((JSONObject) value);
-				}
-				map.put(key, value);
-			}
-
-			return map;
-		}
-
-		private List<Object> toList(JSONArray array) throws JSONException {
-			List<Object> list = new ArrayList<Object>();
-			for(int i = 0; i < array.length(); i++) {
-				Object value = array.get(i);
-				if(value instanceof JSONArray) {
-					value = toList((JSONArray) value);
-				}
-
-				else if(value instanceof JSONObject) {
-					value = toMap((JSONObject) value);
-				}
-					list.add(value);
-			}
-			return list;
-		}
-		
-		private void writeStringToFile(String str, String file) {
-			try {
-				Files.write(Paths.get(file), str.getBytes());
-			}
-			catch(Exception e) {
-				System.out.println("Could not write to file. =(");
-			}
 		}
 	}
 
