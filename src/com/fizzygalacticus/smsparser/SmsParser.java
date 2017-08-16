@@ -185,7 +185,7 @@ public class SmsParser extends JFrame {
 		this.contactList.setSelectedIndex(0);
 		this.infoText.setText("Done.");
 	}
-	
+
 	private class SmsParserActionListener extends KeyAdapter implements ActionListener, ListSelectionListener {
 		private static final int LEFT_MOUSE_BUTTON = 16;
 		private static final int RIGHT_MOUSE_BUTTON = 4;
@@ -243,7 +243,6 @@ public class SmsParser extends JFrame {
 						document.open();
 						
 						ArrayList<Message> selectedMessages = messageMap.get(contactList.getSelectedValue());
-						
 						for(Message message : selectedMessages) {
 							document.add(new Paragraph(message.toString()));
 							document.add(Chunk.NEWLINE);
