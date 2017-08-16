@@ -3,6 +3,9 @@
  */
 package com.fizzygalacticus.smsparser;
 
+import com.fizzygalacticus.html.BootstrapPage;
+import com.fizzygalacticus.html.Br;
+import com.fizzygalacticus.html.Element;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Paragraph;
@@ -86,6 +89,7 @@ public class SmsParser extends JFrame {
 	private final JMenu exportMenu = new JMenu("Export...");
 	private final JMenuItem toPdfMenuItem = new JMenuItem("To PDF");
 	private final JMenuItem toJsonMenuItem = new JMenuItem("To JSON");
+	private final JMenuItem toHtmlMenuItem = new JMenuItem("To HTML");
 
 	/**
 	 * @throws HeadlessException
@@ -165,6 +169,11 @@ public class SmsParser extends JFrame {
 		this.toJsonMenuItem.addActionListener(new SmsParserActionListener());
 		
 		exportMenu.add(toJsonMenuItem);
+		
+		toHtmlMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		this.toHtmlMenuItem.addActionListener(new SmsParserActionListener());
+		
+		exportMenu.add(toHtmlMenuItem);
 		
 		menuBar.add(horizontalStrut);
 		searchInput.addKeyListener(new SmsParserActionListener());
@@ -280,6 +289,72 @@ public class SmsParser extends JFrame {
 					}
 				}
 			}
+			else if(source == toHtmlMenuItem) {
+				String filename = this.openFileChooser(new FileNameExtensionFilter("HTML File", "html", "HTML"));
+				ArrayList<Message> selectedMessages = messageMap.get(contactList.getSelectedValue());
+				BootstrapPage page = new BootstrapPage("SMS Backup - " + selectedMessages.get(0).getContactName());
+				page.addCss("https://codepen.io/8eni/pen/YWoRGm.css");
+				
+				for(int i = 0; i < selectedMessages.size(); i++) {
+					Message message = selectedMessages.get(i);
+					Element row = BootstrapPage.createRow();
+					Element col = BootstrapPage.createColumn(12);
+					col.addClass("speech-wrapper");
+					
+					Element bubble = new Element();
+					bubble.addClass("bubble");
+					
+					Element txt = new Element();
+					txt.addClass("txt");
+					
+					Element name = new Element("p");
+					name.addClass("name");
+					
+					Element nameSpan = new Element("span");
+					
+					Element messageElem = new Element("p");
+					messageElem.addClass("message");
+					messageElem.addChild(message.getBody());
+					
+					Element timestamp = new Element("span");
+					timestamp.addClass("timestamp");
+					timestamp.addChild(message.getReadableDateReceived());
+					
+					Element bubbleArrow = new Element();
+					bubbleArrow.addClass("bubble-arrow");
+					
+					if(message.getType() == Message.TYPE_TO) {
+						bubble.addClass("alt");
+						name.addClass("alt");
+						bubbleArrow.addClass("alt");
+
+						name.addChild("You");
+					}
+					else {
+						name.addChild(message.getContactName());
+						nameSpan.addChild(" ~ " + message.getAddress());
+					}
+					
+					name.addChild(nameSpan);
+					txt.addChild(name);
+					txt.addChild(messageElem);
+					txt.addChild(new Br());
+					txt.addChild(timestamp);
+					bubble.addChild(txt);
+					bubble.addChild(bubbleArrow);
+					
+					col.addChild(bubble);
+					row.addChild(col);
+					page.addBodyObject(row);
+				}
+				
+				try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename))) {
+		            writer.write(page.toString());
+		            infoText.setText("Successfully exported messages to: " + filename);
+		        } catch (IOException e) {
+					infoText.setText("Failed to export: Could not write to file.");
+				}
+			}
 		}
 		
 		public void valueChanged(ListSelectionEvent e) {
@@ -382,6 +457,5 @@ public class SmsParser extends JFrame {
 	 */
 	public static void main(String[] args) {
 		new SmsParser();
-
 	}
 }

@@ -6,8 +6,8 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class Message {
-	private static final int TYPE_TO = 2;
-	private static final int TYPE_FROM = 1;
+	public static final int TYPE_TO = 2;
+	public static final int TYPE_FROM = 1;
 	private Long dateReceived = null;
 	private Long dateSent = null;
 	private String readableDateReceived = null;
