@@ -25,6 +25,7 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 
 import java.awt.Font;
+import java.awt.FontFormatException;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
@@ -91,10 +92,24 @@ public class SmsParser extends JFrame {
 	private final JMenuItem toJsonMenuItem = new JMenuItem("To JSON");
 	private final JMenuItem toHtmlMenuItem = new JMenuItem("To HTML");
 
+	Font josefinFontRegular = null;
+	Font josefinFontBold = null;
+
 	/**
 	 * @throws HeadlessException
 	 */
 	public SmsParser() throws HeadlessException {
+		try {
+			this.josefinFontRegular = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResource("/fonts/JosefinSans-Regular.ttf").openStream());
+			this.josefinFontRegular = this.josefinFontRegular.deriveFont(14f);
+			this.josefinFontBold = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResource("/fonts/JosefinSans-Bold.ttf").openStream());
+			this.josefinFontBold = this.josefinFontBold.deriveFont(14f);
+		} catch (FontFormatException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		getContentPane().setFont(this.josefinFontRegular);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(SmsParser.class.getResource("/icons/messageIcon.png")));
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -129,11 +144,13 @@ public class SmsParser extends JFrame {
 		
 		this.setSize(640, 480);
 		this.setResizable(false);
-		setFont(new Font("DejaVu Serif", Font.PLAIN, 12));
+		setFont(this.josefinFontRegular);
 		
 		this.createMenus();
+		messageArea.setFont(this.josefinFontRegular);
 		
 		this.messageArea.setLineWrap(true);
+		contactList.setFont(this.josefinFontBold);
 		contactList.addListSelectionListener(new SmsParserActionListener());
 		
 		messageScrollArea.setViewportView(this.messageArea);
@@ -141,36 +158,37 @@ public class SmsParser extends JFrame {
 		getContentPane().setLayout(groupLayout);
 		
 		this.setVisible(true);
-			infoLabel.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
-			infoText.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+			infoLabel.setFont(this.josefinFontBold);
+			infoText.setFont(this.josefinFontRegular);
 	}
 	
 	public void createMenus() {
-		menuBar.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		menuBar.setFont(this.josefinFontBold);
 		setJMenuBar(this.menuBar);
-		fileMenu.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		fileMenu.setFont(this.josefinFontBold);
 		
 		this.menuBar.add(this.fileMenu);
-		openMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		openMenuItem.setFont(this.josefinFontBold);
 		
 		this.openMenuItem.addActionListener(new SmsParserActionListener());
 		this.fileMenu.add(this.openMenuItem);
-		exitMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		exitMenuItem.setFont(this.josefinFontBold);
 		
 		this.exitMenuItem.addActionListener(new SmsParserActionListener());
 		this.fileMenu.add(this.exitMenuItem);
-		toPdfMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		toPdfMenuItem.setFont(this.josefinFontBold);
 		
 		this.toPdfMenuItem.addActionListener(new SmsParserActionListener());
+		exportMenu.setFont(this.josefinFontBold);
 		this.exportMenu.add(this.toPdfMenuItem);
 		
 		menuBar.add(exportMenu);
-		toJsonMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		toJsonMenuItem.setFont(this.josefinFontBold);
 		this.toJsonMenuItem.addActionListener(new SmsParserActionListener());
 		
 		exportMenu.add(toJsonMenuItem);
 		
-		toHtmlMenuItem.setFont(new Font("DejaVu Serif", Font.BOLD, 12));
+		toHtmlMenuItem.setFont(this.josefinFontBold);
 		this.toHtmlMenuItem.addActionListener(new SmsParserActionListener());
 		
 		exportMenu.add(toHtmlMenuItem);
@@ -178,7 +196,7 @@ public class SmsParser extends JFrame {
 		menuBar.add(horizontalStrut);
 		searchInput.addKeyListener(new SmsParserActionListener());
 		
-		searchInput.setFont(new Font("DejaVu Serif", Font.PLAIN, 12));
+		searchInput.setFont(this.josefinFontRegular);
 		searchInput.setText("Search...");
 		menuBar.add(searchInput);
 		searchInput.setColumns(3);
@@ -323,7 +341,7 @@ public class SmsParser extends JFrame {
 					Element bubbleArrow = new Element();
 					bubbleArrow.addClass("bubble-arrow");
 					
-					if(message.getType() == Message.TYPE_TO) {
+					if(message.getSenderType() == Message.TYPE_TO) {
 						bubble.addClass("alt");
 						name.addClass("alt");
 						bubbleArrow.addClass("alt");
@@ -395,7 +413,7 @@ public class SmsParser extends JFrame {
 				message.setReadableDateReceived(jsonMessage.getString("readable_date"));
 				message.setContactName(jsonMessage.getString("contact_name"));
 				message.setDateSent(jsonMessage.getLong("date_sent"));
-				message.setType(jsonMessage.getInt("type"));
+				message.setSenderType(jsonMessage.getInt("type"));
 				infoText.setText("Reading message from: " + message.getContactName());
 				
 				message.setBody(jsonMessage.get("body").toString());

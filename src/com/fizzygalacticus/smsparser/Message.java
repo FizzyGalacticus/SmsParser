@@ -12,7 +12,7 @@ public class Message {
 	private Long dateSent = null;
 	private String readableDateReceived = null;
 	private String contactName = null;
-	private int type = 0;
+	private int senderType = 0;
 	private String address = null;
 	private String body = null;
 	
@@ -40,11 +40,11 @@ public class Message {
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
 	}
-	public int getType() {
-		return type;
+	public int getSenderType() {
+		return senderType;
 	}
-	public void setType(int type) {
-		this.type = type;
+	public void setSenderType(int type) {
+		this.senderType = type;
 	}
 	public String getAddress() {
 		return address;
@@ -87,9 +87,9 @@ public class Message {
 	public String toString() {
 		String ret = "";
 		
-		if(this.getType() == Message.TYPE_FROM)
+		if(this.getSenderType() == Message.TYPE_FROM)
 			ret += this.getContactName() + " ";
-		else if(this.getType() == Message.TYPE_TO)
+		else if(this.getSenderType() == Message.TYPE_TO)
 			ret += "You ";
 		
 		ret += "(" + this.readableDateReceived + "): ";
